@@ -1,0 +1,54 @@
+name: Lab 12 - AWS Secrets Manager com OIDC
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: ${{ secrets.LAB12_AWS_REGION }}
+  AWS_SECRET_ID: ${{ secrets.LAB12_AWS_SECRET_ID }}
+
+jobs:
+  acessar-secret-aws:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: lab12-aws-prod
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v5
+
+      - name: Autenticar na AWS via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.LAB12_AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Validar identidade AWS
+        run: aws sts get-caller-identity
+
+      - name: Ler secret do AWS Secrets Manager
+        run: |
+          echo "Consultando secret: $AWS_SECRET_ID"
+          SECRET_VALUE=$(aws secretsmanager get-secret-value \
+            --secret-id "$AWS_SECRET_ID" \
+            --query SecretString \
+            --output text)
+
+          echo "Secret recuperada com sucesso."
+          echo "Não exibindo o valor em log por segurança."
+          echo "AWS_SECRET_PAYLOAD<<EOF" >> "$GITHUB_ENV"
+          echo "$SECRET_VALUE" >> "$GITHUB_ENV"
+          echo "EOF" >> "$GITHUB_ENV"
+
+      - name: Usar secret sem expor valor
+        run: |
+          if [ -n "$AWS_SECRET_PAYLOAD" ]; then
+            echo "Payload disponível para o job."
+          else
+            echo "Payload não encontrado."
+            exit 1
+          fi

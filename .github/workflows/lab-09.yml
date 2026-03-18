@@ -55,5 +55,5 @@ jobs:
           echo "Segurança dos Secrets:"
           echo "- Secrets nunca aparecem em logs (são substituídos por ***)"
           echo "- Secrets não são acessíveis em forks do repositório"
-          echo "- Secrets só são expostos para workflows autorizados"
+          echo "- Secrets só ficam disponíveis quando o GitHub permite naquele contexto"
           echo "- Você pode atualizar secrets sem alterar o código"

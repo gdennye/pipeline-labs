@@ -1,0 +1,58 @@
+name: Lab 13 - GCP Secret Manager com OIDC
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  GCP_PROJECT_ID: ${{ secrets.LAB13_GCP_PROJECT_ID }}
+  GCP_SECRET_NAME: ${{ secrets.LAB13_GCP_SECRET_NAME }}
+
+jobs:
+  acessar-secret-gcp:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: lab13-gcp-prod
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v5
+
+      - name: Autenticar no Google Cloud via OIDC
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.LAB13_GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.LAB13_GCP_SERVICE_ACCOUNT }}
+
+      - name: Configurar gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+
+      - name: Validar identidade GCP
+        run: gcloud auth list --filter=status:ACTIVE
+
+      - name: Ler secret do GCP Secret Manager
+        run: |
+          echo "Consultando secret: $GCP_SECRET_NAME"
+          SECRET_VALUE=$(gcloud secrets versions access latest \
+            --secret="$GCP_SECRET_NAME" \
+            --project="$GCP_PROJECT_ID")
+
+          echo "Secret recuperada com sucesso."
+          echo "Não exibindo o valor em log por segurança."
+          echo "GCP_SECRET_PAYLOAD<<EOF" >> "$GITHUB_ENV"
+          echo "$SECRET_VALUE" >> "$GITHUB_ENV"
+          echo "EOF" >> "$GITHUB_ENV"
+
+      - name: Usar secret sem expor valor
+        run: |
+          if [ -n "$GCP_SECRET_PAYLOAD" ]; then
+            echo "Payload disponível para o job."
+          else
+            echo "Payload não encontrado."
+            exit 1
+          fi

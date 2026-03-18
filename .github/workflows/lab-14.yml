@@ -1,0 +1,56 @@
+name: Lab 14 - Azure Key Vault com OIDC
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AZURE_KEYVAULT_NAME: ${{ secrets.LAB14_AZURE_KEYVAULT_NAME }}
+  AZURE_SECRET_NAME: ${{ secrets.LAB14_AZURE_SECRET_NAME }}
+
+jobs:
+  acessar-secret-azure:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: lab14-azure-prod
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v5
+
+      - name: Autenticar na Azure via OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.LAB14_AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.LAB14_AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.LAB14_AZURE_SUBSCRIPTION_ID }}
+
+      - name: Validar identidade Azure
+        run: az account show
+
+      - name: Ler secret do Azure Key Vault
+        run: |
+          echo "Consultando secret: $AZURE_SECRET_NAME"
+          SECRET_VALUE=$(az keyvault secret show \
+            --vault-name "$AZURE_KEYVAULT_NAME" \
+            --name "$AZURE_SECRET_NAME" \
+            --query value \
+            --output tsv)
+
+          echo "Secret recuperada com sucesso."
+          echo "Não exibindo o valor em log por segurança."
+          echo "AZURE_SECRET_PAYLOAD<<EOF" >> "$GITHUB_ENV"
+          echo "$SECRET_VALUE" >> "$GITHUB_ENV"
+          echo "EOF" >> "$GITHUB_ENV"
+
+      - name: Usar secret sem expor valor
+        run: |
+          if [ -n "$AZURE_SECRET_PAYLOAD" ]; then
+            echo "Payload disponível para o job."
+          else
+            echo "Payload não encontrado."
+            exit 1
+          fi
