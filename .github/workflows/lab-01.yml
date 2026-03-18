@@ -1,36 +1,49 @@
-name: Hello Github Actions
+# Nome do workflow que aparece na interface do GitHub Actions
+name: "Estrutura de Diretórios e Arquivos"
 
+# Define quando o workflow será executado
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-  workflow_dispatch:
+  push:                    # Executa quando houver push
+    branches: [ main ]     # Apenas na branch main
+  workflow_dispatch:       # Permite execução manual pela interface
 
+# Variáveis de ambiente globais do workflow
+env:
+  NODE_VERSION: '18'       # Disponível em todos os jobs e steps
+
+# Define os trabalhos (jobs) que serão executados
 jobs:
-  hello-job:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Código
-        uses: actions/checkout@v5
-
-      - name: Exeecutar Hello World
-        run: echo " Hello, Github Actions! "
-
-      - name: Mostrar informações do Sistema
-        run: |
-          echo " == INFORMAÇÕES DO SISTEMA == "
-          echo " Sistema Operacional: ${{ runner.os }} "
-          echo " Diretório Atual: $(pwd) "
-          echo " Data Atual: $(date) "
-          echo " Usuário: $(whoami) "
+  demonstrar-estrutura:                  # ID único do job
+    name: "Demonstrar Estrutura Básica"  # Nome exibido na interface
+    runs-on: ubuntu-latest               # Sistema operacional do runner
     
-      - name: Listar arquivos do repositório
-        run: ls -la
-
-      - name: Comandos múltiplos
+    # Lista de etapas (steps) executadas sequencialmente
+    steps:
+      # Step 1: Faz checkout do código do repositório
+      - name: Checkout do código
+        uses: actions/checkout@v5        # Usa action pré-construída
+      
+      # Step 2: Lista arquivos no diretório .github/workflows
+      - name: Mostrar estrutura .github/workflows
+        run: |                           # Executa comandos shell
+          echo "=== ESTRUTURA DO DIRETÓRIO .github/workflows ==="
+          ls -la .github/workflows/
+          echo ""
+          echo "Total de workflows: $(ls -1 .github/workflows/*.y*ml 2>/dev/null | wc -l)"
+      
+      # Step 3: Mostra os 3 elementos obrigatórios de um workflow
+      - name: Elementos obrigatórios do workflow
         run: |
-          echo " == COMANDOS MÚLTIPLOS == "
-          echo " Este é o Lab 01 do curso de Github Actions "
-          echo " Workflow executado com sucesso! "
-          echo " Pronto para novos desafios! "
+          echo "=== ELEMENTOS OBRIGATÓRIOS ==="
+          echo "1. name: Nome do workflow"
+          echo "2. on: Eventos de trigger (push, workflow_dispatch)"
+          echo "3. jobs: Tarefas a executar"
+      
+      # Step 4: Demonstra uso de variáveis e contextos do GitHub
+      - name: Variáveis e contextos
+        run: |
+          echo "=== VARIÁVEIS E CONTEXTOS ==="
+          echo "Variável env: ${{ env.NODE_VERSION }}"      # Acessa variável de ambiente
+          echo "Repositório: ${{ github.repository }}"      # Contexto do GitHub
+          echo "Branch: ${{ github.ref_name }}"             # Nome da branch
+          echo "Actor: ${{ github.actor }}"                 # Usuário que executou
