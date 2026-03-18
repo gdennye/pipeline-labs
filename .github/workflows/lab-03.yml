@@ -1,4 +1,4 @@
-name: Push Trigger Workflow
+name: Lab 03 - Push Trigger Workflow
 
 ### Executa apenas em push
 on:

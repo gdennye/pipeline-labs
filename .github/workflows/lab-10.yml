@@ -1,4 +1,4 @@
-name: Deploy Multi-Ambientes
+name: Lab 10 - Deploy Multi-Ambientes
 
 on:
   workflow_dispatch:  # Permite execução manual para testar cada ambiente

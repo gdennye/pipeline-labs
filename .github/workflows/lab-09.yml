@@ -1,4 +1,4 @@
-name: Demo GitHub Secrets
+name: Lab 09 - Demo GitHub Secrets
 
 on:
   push:

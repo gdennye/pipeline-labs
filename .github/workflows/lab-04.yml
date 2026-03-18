@@ -1,4 +1,4 @@
-name: Issue Trigger Workflow
+name: Lab 04 - Issue Trigger Workflow
 # Permissões para permitir comentários automáticos
 permissions:
   issues: write

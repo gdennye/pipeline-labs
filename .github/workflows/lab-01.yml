@@ -1,5 +1,6 @@
+name: Lab 01 - Estrutura de Diretórios e Arquivos
+
 # Nome do workflow que aparece na interface do GitHub Actions
-name: "Estrutura de Diretórios e Arquivos"
 
 # Define quando o workflow será executado
 on:

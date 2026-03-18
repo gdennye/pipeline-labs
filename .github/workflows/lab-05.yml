@@ -1,4 +1,4 @@
-name: Jobs Paralelos
+name: Lab 05 - Jobs Paralelos
 
 on:
   push:

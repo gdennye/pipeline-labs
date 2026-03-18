@@ -1,4 +1,4 @@
-name: Schedule Trigger Workflow
+name: Lab 02 - Schedule Trigger Workflow
 
 ## Executa em horários programados (cron)
 on:
